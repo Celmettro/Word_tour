@@ -7,8 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -135,11 +134,34 @@
       margin-bottom: 3rem;
     }
 
-    #map-world {
-      width: 100%; height: 480px;
-      border-radius: 2px;
+    .map-wrap {
+      width: 100%;
       border: 1px solid var(--border);
+      border-radius: 2px;
       overflow: hidden;
+      position: relative;
+      background: #e8f0f8;
+    }
+    .map-wrap canvas { display: block; width: 100%; }
+    .map-legend {
+      position: absolute; bottom: 1rem; left: 1rem;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.9rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      display: flex; flex-direction: column; gap: 0.35rem;
+    }
+    .legend-row { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .map-tooltip {
+      position: absolute; pointer-events: none;
+      background: var(--ink); color: var(--sand);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.72rem; letter-spacing: 0.04em;
+      white-space: nowrap;
+      opacity: 0; transition: opacity 0.15s;
     }
 
     /* ── TRIPS GRID ── */
@@ -241,10 +263,8 @@
     }
 
     /* map for itinerary */
-    #map-trip {
-      width: 100%; height: 340px;
-      border-radius: 2px;
-      border: 1px solid var(--border);
+    #map-trip-wrap {
+      width: 100%;
       margin-bottom: 3rem;
     }
 
@@ -476,7 +496,14 @@
 <section id="voyages" class="section">
   <p class="section-label">Nos destinations</p>
   <h2 class="section-title">Où on est<br/>allées dans le monde</h2>
-  <div id="map-world"></div>
+  <div class="map-wrap" style="height:420px;">
+    <canvas id="map-world" style="height:420px;"></canvas>
+    <div class="map-legend">
+      <div class="legend-row"><div class="legend-dot" style="background:#c8815a;"></div>Étapes du voyage</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#7a9e87;border:2px solid #7a9e87;"></div>Départ / Arrivée</div>
+    </div>
+    <div class="map-tooltip" id="world-tooltip"></div>
+  </div>
 
   <div class="trips-grid" id="trips-grid">
     <!-- injected by JS -->
@@ -509,7 +536,10 @@
       </div>
     </div>
 
-    <div id="map-trip"></div>
+    <div id="map-trip-wrap" class="map-wrap" style="height:320px; margin-bottom:3rem;">
+      <canvas id="map-trip" style="height:320px;"></canvas>
+      <div class="map-tooltip" id="trip-tooltip"></div>
+    </div>
 
     <div class="days-list" id="days-list">
       <!-- injected by JS -->
@@ -621,13 +651,25 @@ const TRIPS = [
     start: '26 juil. 2026',
     end: '11 août 2026',
     daysCount: '17 jours',
-    coords: [[1.3521, 103.8198], [5.9804, 116.0735], [3.1390, 101.6869], [5.4141, 100.3288], [5.9065, 102.7560]],
+    stops: [
+      { name: 'Genève', lat: 46.20, lon: 6.15, day: 'Jour 1 · Départ 10h25', accent: true },
+      { name: 'Istanbul', lat: 41.01, lon: 28.97, day: 'Jour 1–2 · Escale' },
+      { name: 'Singapour', lat: 1.35, lon: 103.82, day: 'Jour 2–4 · Universal Studios, visite' },
+      { name: 'Kota Kinabalu', lat: 5.98, lon: 116.07, day: 'Jour 5 · Bornéo – arrivée' },
+      { name: 'Kinabatangan', lat: 5.42, lon: 118.03, day: 'Jour 6 · Safari jungle' },
+      { name: 'Kuala Lumpur', lat: 3.14, lon: 101.69, day: 'Jour 7–8 · Chinatown, Batu Caves' },
+      { name: 'Penang', lat: 5.41, lon: 100.33, day: 'Jour 9–10 · Georgetown' },
+      { name: 'Îles Perhentian', lat: 5.90, lon: 102.75, day: 'Jour 11–13 · Plongée & plage' },
+      { name: 'Kuala Lumpur', lat: 3.14, lon: 101.69, day: 'Jour 14–16 · Retour & vol' },
+      { name: 'Istanbul', lat: 41.01, lon: 28.97, day: 'Jour 17 · Escale retour' },
+      { name: 'Genève', lat: 46.20, lon: 6.15, day: 'Jour 17 · Arrivée 09h05', accent: true },
+    ],
     days: [
       { j:'Jour 1', date:'26.07', lieu:'Genève → Istanbul', hotel:'Avion', prog:'Départ 10h25 depuis Genève', note:'' },
-      { j:'Jour 2', date:'27.07', lieu:'Istanbul → Singapour', hotel:'Amara Singapore', prog:'Arrivée 09h30 · Visite Singapour', note:'Hôtel booké via Booking (annulation gratuite). Option plus proche du centre aussi disponible.' },
-      { j:'Jour 3', date:'28.07', lieu:'Singapour', hotel:'Amara Singapore', prog:'🎢 Universal Studios Singapore', note:'SGD 89 / personne ≈ 55 CHF. Parc 8 min en voiture de l'hôtel.' },
+      { j:'Jour 2', date:'27.07', lieu:'Istanbul → Singapour', hotel:'Amara Singapore', prog:'Arrivée 09h30 · Visite Singapour', note:"Hôtel booké via Booking (annulation gratuite). Option plus proche du centre aussi disponible." },
+      { j:'Jour 3', date:'28.07', lieu:'Singapour', hotel:'Amara Singapore', prog:'Universal Studios Singapore', note:"SGD 89 / personne ≈ 55 CHF. Parc 8 min en voiture de l'hôtel." },
       { j:'Jour 4', date:'29.07', lieu:'Singapour', hotel:'Amara Singapore', prog:'Visite libre de Singapour', note:'' },
-      { j:'Jour 5', date:'30.07', lieu:'Kota Kinabalu – Bornéo', hotel:'Aeropod LAXZONE', prog:'Vol vers Kota Kinabalu · Arrivée Bornéo', note:'Possibilité d'expérience jungle via Seek Sophie ou River Junkie Kinabatangan.' },
+      { j:'Jour 5', date:'30.07', lieu:'Kota Kinabalu – Bornéo', hotel:'Aeropod LAXZONE', prog:'Vol vers Kota Kinabalu · Arrivée Bornéo', note:"Possibilité d'expérience jungle via Seek Sophie ou River Junkie Kinabatangan." },
       { j:'Jour 6', date:'31.07', lieu:'Bornéo – Kinabatangan', hotel:'Seek Sophie (package)', prog:'Safari faune sauvage · Jungle', note:'2 nuits incluses dans le package Seek Sophie (751,74 CHF pour deux).' },
       { j:'Jour 7', date:'01.08', lieu:'Kuala Lumpur', hotel:'Moxy KL Chinatown', prog:'Arrivée KL · Exploration Chinatown', note:'' },
       { j:'Jour 8', date:'02.08', lieu:'Kuala Lumpur', hotel:'Moxy KL Chinatown', prog:'Visite libre KL', note:'' },
@@ -639,40 +681,148 @@ const TRIPS = [
       { j:'Jour 14', date:'08.08', lieu:'Kuala Lumpur', hotel:'À définir', prog:'Trajet îles Perhentian → KL', note:'' },
       { j:'Jour 15', date:'09.08', lieu:'Kuala Lumpur', hotel:'À définir', prog:'Batu Caves · Visite KL', note:'' },
       { j:'Jour 16', date:'10.08', lieu:'Kuala Lumpur → Istanbul', hotel:'Avion', prog:'Visite KL · Transfert aéroport ~20h00 · Départ 23h25', note:'' },
-      { j:'Jour 17', date:'11.08', lieu:'Istanbul → Genève', hotel:'', prog:'Arrivée Genève 09h05 ✈', note:'' },
+      { j:'Jour 17', date:'11.08', lieu:'Istanbul → Genève', hotel:'', prog:'Arrivée Genève 09h05', note:'' },
     ]
   }
 ];
 
-// Stored additional trips
 let extraTrips = JSON.parse(localStorage.getItem('wt-extra-trips') || '[]');
 
-// ── WORLD MAP ─────────────────────────────────────────────────────────────────
-const worldMap = L.map('map-world', {
-  center: [15, 80],
-  zoom: 3,
-  zoomControl: true,
-  scrollWheelZoom: false
-});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© OpenStreetMap contributors © CARTO',
-  maxZoom: 19
-}).addTo(worldMap);
+// ── CANVAS MAP ENGINE ─────────────────────────────────────────────────────────
+function createMap(canvasId, tooltipId, stops, viewBox) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const tooltip = document.getElementById(tooltipId);
+  const ctx = canvas.getContext('2d');
 
-const dotIcon = L.divIcon({
-  className: '',
-  html: `<div style="width:10px;height:10px;border-radius:50%;background:#c8815a;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div>`,
-  iconSize: [10,10],
-  iconAnchor: [5,5]
-});
+  // viewBox: { minLon, maxLon, minLat, maxLat }
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = canvas.parentElement.offsetHeight;
+    draw();
+  }
 
-// Plot all destinations
-TRIPS.forEach(t => {
-  t.coords.forEach(c => {
-    L.marker(c, { icon: dotIcon }).addTo(worldMap)
-      .bindPopup(`<strong style="font-family:serif">${t.name}</strong><br/>${t.dates}`);
+  function lonToX(lon) {
+    return ((lon - viewBox.minLon) / (viewBox.maxLon - viewBox.minLon)) * canvas.width;
+  }
+  function latToY(lat) {
+    // Mercator-ish: flip lat so north is up
+    return ((viewBox.maxLat - lat) / (viewBox.maxLat - viewBox.minLat)) * canvas.height;
+  }
+
+  function draw() {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background ocean
+    ctx.fillStyle = '#d4e8f5';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(120,160,200,0.2)';
+    ctx.lineWidth = 0.5;
+    for (let lon = Math.ceil(viewBox.minLon/10)*10; lon <= viewBox.maxLon; lon += 10) {
+      const x = lonToX(lon);
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let lat = Math.ceil(viewBox.minLat/10)*10; lat <= viewBox.maxLat; lat += 10) {
+      const y = latToY(lat);
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // Route line
+    ctx.strokeStyle = 'rgba(200,129,90,0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    stops.forEach((s, i) => {
+      const x = lonToX(s.lon), y = latToY(s.lat);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Dots
+    stops.forEach((s, idx) => {
+      const x = lonToX(s.lon), y = latToY(s.lat);
+      const r = s.accent ? 7 : 5.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = s.accent ? '#7a9e87' : '#c8815a';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Label
+      const label = s.name;
+      ctx.font = '500 11px Inter, sans-serif';
+      ctx.fillStyle = '#1a1a18';
+      const tw = ctx.measureText(label).width;
+      let lx = x + r + 5;
+      let ly = y + 4;
+      if (lx + tw > W - 4) lx = x - r - 5 - tw;
+      if (ly > H - 8) ly = y - r - 4;
+      ctx.fillText(label, lx, ly);
+    });
+
+    // Subtle vignette
+    const vig = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.8);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.06)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Tooltip on hover
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+    let found = null;
+    stops.forEach(s => {
+      const dx = mx - lonToX(s.lon), dy = my - latToY(s.lat);
+      if (Math.sqrt(dx*dx + dy*dy) < 14) found = s;
+    });
+    if (found && tooltip) {
+      tooltip.textContent = found.name + (found.day ? ' · ' + found.day : '');
+      tooltip.style.opacity = '1';
+      tooltip.style.left = (e.clientX - canvas.parentElement.getBoundingClientRect().left + 12) + 'px';
+      tooltip.style.top = (e.clientY - canvas.parentElement.getBoundingClientRect().top - 10) + 'px';
+    } else if (tooltip) {
+      tooltip.style.opacity = '0';
+    }
   });
+  canvas.addEventListener('mouseleave', () => { if(tooltip) tooltip.style.opacity = '0'; });
+
+  window.addEventListener('resize', resize);
+  resize();
+}
+
+// ── WORLD MAP ─────────────────────────────────────────────────────────────────
+const worldStops = [
+  { name: 'Genève', lat: 46.20, lon: 6.15, accent: true },
+  { name: 'Istanbul', lat: 41.01, lon: 28.97 },
+  { name: 'Singapour', lat: 1.35, lon: 103.82 },
+  { name: 'Kota Kinabalu', lat: 5.98, lon: 116.07 },
+  { name: 'Kinabatangan', lat: 5.42, lon: 118.03 },
+  { name: 'Kuala Lumpur', lat: 3.14, lon: 101.69 },
+  { name: 'Penang', lat: 5.41, lon: 100.33 },
+  { name: 'Îles Perhentian', lat: 5.90, lon: 102.75 },
+];
+
+createMap('map-world', 'world-tooltip', worldStops, {
+  minLon: -10, maxLon: 130, minLat: -5, maxLat: 55
 });
+
+// ── TRIP MAP (Asie du Sud-Est zoom) ──────────────────────────────────────────
+function loadTripMap(trip) {
+  if (!trip.stops) return;
+  createMap('map-trip', 'trip-tooltip', trip.stops, {
+    minLon: 94, maxLon: 124, minLat: -1, maxLat: 18
+  });
+}
 
 // ── TRIP CARDS ────────────────────────────────────────────────────────────────
 function renderTripCards() {
@@ -696,33 +846,6 @@ function renderTripCards() {
     });
     grid.appendChild(div);
   });
-}
-
-// ── TRIP MAP ──────────────────────────────────────────────────────────────────
-const tripMap = L.map('map-trip', {
-  scrollWheelZoom: false,
-  zoomControl: true
-});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© OpenStreetMap contributors © CARTO',
-  maxZoom: 19
-}).addTo(tripMap);
-
-function loadTripMap(trip) {
-  tripMap.eachLayer(l => { if(l instanceof L.Marker || l instanceof L.Polyline) tripMap.removeLayer(l); });
-  if(!trip.coords || !trip.coords.length) return;
-
-  const stopIcon = (n) => L.divIcon({
-    className: '',
-    html: `<div style="width:22px;height:22px;border-radius:50%;background:#1a1a18;color:#f5f0e8;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:serif;font-weight:600;border:2px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.25)">${n}</div>`,
-    iconSize: [22,22], iconAnchor: [11,11]
-  });
-
-  trip.coords.forEach((c, i) => {
-    L.marker(c, { icon: stopIcon(i+1) }).addTo(tripMap);
-  });
-  L.polyline(trip.coords, { color: '#c8815a', weight: 1.5, opacity: 0.6, dashArray: '6,6' }).addTo(tripMap);
-  tripMap.fitBounds(trip.coords, { padding: [30,30] });
 }
 
 // ── ITINERARY ─────────────────────────────────────────────────────────────────
@@ -769,25 +892,17 @@ function saveTrip() {
   const end = document.getElementById('f-end').value;
   const notes = document.getElementById('f-notes').value.trim();
   if(!name) return;
-
   const trip = {
-    id: 'trip-'+Date.now(),
-    name,
+    id: 'trip-'+Date.now(), name,
     dates: start && end ? `${start} → ${end}` : (start || end || ''),
     year: start ? start.slice(0,4) : '?',
     tags: dest ? dest.split(',').map(s=>s.trim()) : [],
-    status: 'planned', statusLabel: 'Planifié',
-    notes
+    status: 'planned', statusLabel: 'Planifié', notes
   };
   extraTrips.push(trip);
   localStorage.setItem('wt-extra-trips', JSON.stringify(extraTrips));
-  renderTripCards();
-  closeModal();
-  document.getElementById('f-name').value='';
-  document.getElementById('f-dest').value='';
-  document.getElementById('f-start').value='';
-  document.getElementById('f-end').value='';
-  document.getElementById('f-notes').value='';
+  renderTripCards(); closeModal();
+  ['f-name','f-dest','f-start','f-end','f-notes'].forEach(id => document.getElementById(id).value='');
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
