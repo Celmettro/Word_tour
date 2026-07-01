@@ -7,470 +7,159 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --ink:       #1a1a18;
-      --sand:      #f5f0e8;
-      --warm:      #ede8df;
-      --accent:    #c8815a;
-      --accent2:   #7a9e87;
-      --muted:     #8a8070;
-      --border:    #d8d0c4;
-      --white:     #ffffff;
+      --ink: #1a1a18; --sand: #f5f0e8; --warm: #ede8df;
+      --accent: #c8815a; --accent2: #7a9e87;
+      --muted: #8a8070; --border: #d8d0c4; --white: #ffffff;
     }
-
     html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; font-weight: 300; background: var(--sand); color: var(--ink); min-height: 100vh; }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      font-weight: 300;
-      background: var(--sand);
-      color: var(--ink);
-      min-height: 100vh;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 2.5rem;
-      background: rgba(245,240,232,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.4rem;
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      color: var(--ink);
-      text-decoration: none;
-    }
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 1rem 2.5rem; background: rgba(245,240,232,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; letter-spacing: 0.08em; color: var(--ink); text-decoration: none; }
     .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
+    .nav-links a { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
     .nav-links a:hover { color: var(--ink); }
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      text-align: center;
-      padding: 8rem 2rem 4rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-bg {
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,129,90,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-eyebrow {
-      font-size: 0.7rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-    }
-    .hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3.5rem, 9vw, 7rem);
-      font-weight: 300;
-      line-height: 0.95;
-      letter-spacing: -0.01em;
-      margin-bottom: 1.5rem;
-    }
-    .hero h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
-    .hero-sub {
-      font-size: 0.9rem;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      max-width: 400px;
-      line-height: 1.7;
-    }
-    .hero-scroll {
-      position: absolute; bottom: 2.5rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-      color: var(--muted); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
-    }
-    .scroll-line {
-      width: 1px; height: 40px;
-      background: linear-gradient(to bottom, var(--muted), transparent);
-      animation: scrollPulse 2s ease-in-out infinite;
-    }
+    /* HERO */
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8rem 2rem 4rem; position: relative; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,129,90,0.08) 0%, transparent 70%); pointer-events: none; }
+    .hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
+    .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 300; line-height: 0.95; letter-spacing: -0.01em; margin-bottom: 1.5rem; }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); letter-spacing: 0.04em; max-width: 400px; line-height: 1.7; }
+    .hero-scroll { position: absolute; bottom: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--muted), transparent); animation: scrollPulse 2s ease-in-out infinite; }
     @keyframes scrollPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
 
-    /* ── WORLD MAP SECTION ── */
-    .section {
-      padding: 6rem 2.5rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .section-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.75rem;
-    }
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 300;
-      line-height: 1.1;
-      margin-bottom: 3rem;
-    }
+    /* SECTIONS */
+    .section { padding: 6rem 2.5rem; max-width: 1200px; margin: 0 auto; }
+    .section-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 300; line-height: 1.1; margin-bottom: 3rem; }
+    .divider { width: 100%; height: 1px; background: var(--border); max-width: 1200px; margin: 0 auto; }
 
-    .map-wrap {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-      position: relative;
-      background: #e8f0f8;
-    }
-    .map-wrap canvas { display: block; width: 100%; }
-    .map-legend {
-      position: absolute; bottom: 1rem; left: 1rem;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--border);
-      padding: 0.6rem 0.9rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      display: flex; flex-direction: column; gap: 0.35rem;
-    }
-    .legend-row { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .map-tooltip {
-      position: absolute; pointer-events: none;
-      background: var(--ink); color: var(--sand);
-      padding: 0.4rem 0.75rem;
-      font-size: 0.72rem; letter-spacing: 0.04em;
-      white-space: nowrap;
-      opacity: 0; transition: opacity 0.15s;
-    }
-
-    /* ── TRIPS GRID ── */
-    .trips-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      margin-top: 3rem;
-    }
-    .trip-card {
-      background: var(--white);
-      padding: 2rem;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-decoration: none;
-      display: block;
-    }
+    /* TRIPS GRID */
+    .trips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 2rem; }
+    .trip-card { background: var(--white); padding: 2rem; cursor: pointer; transition: background 0.2s; display: block; }
     .trip-card:hover { background: var(--warm); }
     .trip-card.active { background: var(--ink); color: var(--sand); }
-    .trip-card.active .trip-date,
-    .trip-card.active .trip-status { color: rgba(245,240,232,0.5); }
-    .trip-number {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--muted);
-      margin-bottom: 1rem;
-    }
+    .trip-card.active .trip-date, .trip-card.active .trip-status { color: rgba(245,240,232,0.5); }
+    .trip-number { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 1rem; }
     .trip-card.active .trip-number { color: rgba(245,240,232,0.4); }
-    .trip-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.6rem;
-      font-weight: 300;
-      line-height: 1.1;
-      margin-bottom: 0.5rem;
-    }
-    .trip-date {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 1rem;
-    }
+    .trip-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; line-height: 1.1; margin-bottom: 0.5rem; }
+    .trip-date { font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; }
     .trip-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .tag {
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.25rem 0.6rem;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-    .trip-card.active .tag {
-      border-color: rgba(245,240,232,0.2);
-      color: rgba(245,240,232,0.5);
-    }
-    .trip-status {
-      margin-top: 1.5rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent2);
-    }
+    .tag { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.25rem 0.6rem; border: 1px solid var(--border); color: var(--muted); }
+    .trip-card.active .tag { border-color: rgba(245,240,232,0.2); color: rgba(245,240,232,0.5); }
+    .trip-status { margin-top: 1.5rem; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent2); }
     .trip-status.planned { color: var(--accent); }
 
-    /* ── DIVIDER ── */
-    .divider {
-      width: 100%; height: 1px;
-      background: var(--border);
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* ── ITINERARY ── */
+    /* ── ITINERARY SECTION ── */
     #itinerary { background: var(--white); }
-    .itinerary-inner {
-      max-width: 1200px; margin: 0 auto;
-      padding: 6rem 2.5rem;
-    }
-    .itinerary-header {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      flex-wrap: wrap; gap: 2rem;
-      margin-bottom: 4rem;
-    }
-    .itinerary-meta {
-      display: flex; gap: 3rem; flex-wrap: wrap; margin-top: 2rem;
-    }
-    .meta-item { }
-    .meta-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.25rem;
-    }
-    .meta-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-weight: 400;
-    }
+    .itinerary-inner { max-width: 1200px; margin: 0 auto; padding: 6rem 2.5rem; }
+    .itinerary-header { margin-bottom: 3rem; }
+    .itinerary-meta { display: flex; gap: 3rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .meta-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem; }
+    .meta-value { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; }
 
-    /* map for itinerary */
-    #map-trip-wrap {
-      width: 100%;
-      margin-bottom: 3rem;
-    }
+    /* MAP + CALENDAR LAYOUT */
+    .map-cal-layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; border: 1px solid var(--border); margin-bottom: 3rem; min-height: 520px; }
+    #map-trip { height: 520px; z-index: 1; }
+    .calendar-panel { border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+    .cal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .cal-month { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; }
+    .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border); }
+    .cal-dow { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-align: center; padding: 0.6rem 0; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; }
+    .cal-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0.4rem; min-height: 58px; cursor: default; position: relative; transition: background 0.15s; }
+    .cal-cell:nth-child(7n) { border-right: none; }
+    .cal-cell.empty { background: var(--sand); opacity: 0.4; }
+    .cal-cell.has-event { cursor: pointer; }
+    .cal-cell.has-event:hover { background: var(--warm); }
+    .cal-cell.active-day { background: var(--ink) !important; }
+    .cal-cell.active-day .cal-num { color: var(--sand); }
+    .cal-cell.active-day .cal-dot { background: var(--accent); }
+    .cal-num { font-size: 0.7rem; font-weight: 400; color: var(--muted); display: block; margin-bottom: 0.25rem; }
+    .cal-cell.has-event .cal-num { color: var(--ink); font-weight: 500; }
+    .cal-place { font-size: 0.6rem; color: var(--accent2); line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-top: 0.3rem; }
+    .cal-detail { border-top: 1px solid var(--border); padding: 1rem 1.5rem; background: var(--sand); }
+    .cal-detail-day { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
+    .cal-detail-place { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; margin-bottom: 0.3rem; }
+    .cal-detail-prog { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
 
-    /* Day rows */
+    /* DAY LIST */
     .days-list { display: flex; flex-direction: column; }
-    .day-row {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 0;
-      border-top: 1px solid var(--border);
-      padding: 1.5rem 0;
-    }
-    .day-col-left {
-      padding-top: 0.15rem;
-    }
-    .day-num {
-      font-size: 0.6rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .day-date {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      color: var(--ink);
-      margin-top: 0.15rem;
-    }
+    .day-row { display: grid; grid-template-columns: 80px 1fr; border-top: 1px solid var(--border); padding: 1.5rem 0; cursor: pointer; transition: background 0.15s; border-radius: 0; }
+    .day-row:hover { background: var(--warm); padding-left: 0.5rem; }
+    .day-row.highlighted { background: rgba(200,129,90,0.08); border-left: 2px solid var(--accent); padding-left: 0.5rem; }
+    .day-col-left { padding-top: 0.15rem; }
+    .day-num { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .day-date { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--ink); margin-top: 0.15rem; }
     .day-col-right { padding-left: 2rem; border-left: 1px solid var(--border); }
-    .day-location {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.25rem;
-      font-weight: 400;
-      margin-bottom: 0.3rem;
-    }
-    .day-program {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 0.5rem;
-    }
-    .day-hotel {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      font-size: 0.7rem;
-      color: var(--accent2);
-      letter-spacing: 0.04em;
-    }
-    .day-hotel::before {
-      content: '◆';
-      font-size: 0.45rem;
-    }
-    .day-note {
-      margin-top: 0.75rem;
-      padding: 0.75rem 1rem;
-      background: var(--sand);
-      border-left: 2px solid var(--accent);
-      font-size: 0.75rem;
-      line-height: 1.65;
-      color: var(--muted);
-    }
+    .day-location { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 400; margin-bottom: 0.3rem; }
+    .day-program { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 0.5rem; }
+    .day-hotel { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--accent2); letter-spacing: 0.04em; }
+    .day-hotel::before { content: '◆'; font-size: 0.45rem; }
+    .day-note { margin-top: 0.75rem; padding: 0.75rem 1rem; background: var(--sand); border-left: 2px solid var(--accent); font-size: 0.75rem; line-height: 1.65; color: var(--muted); }
 
-    /* ── BUDGET ── */
+    /* BUDGET */
     #budget { background: var(--sand); }
-    .budget-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-    }
-    .budget-item {
-      background: var(--white);
-      padding: 1.75rem;
-    }
-    .budget-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .budget-amount {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem;
-      font-weight: 300;
-    }
-    .budget-currency {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-left: 0.2rem;
-    }
-    .budget-note {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 0.3rem;
-    }
+    .budget-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+    .budget-item { background: var(--white); padding: 1.75rem; }
+    .budget-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .budget-amount { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; }
+    .budget-currency { font-size: 0.8rem; color: var(--muted); margin-left: 0.2rem; }
+    .budget-note { font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
 
-    /* ── ADD TRIP SECTION ── */
+    /* ADD */
     #add { background: var(--ink); color: var(--sand); }
-    .add-inner {
-      max-width: 1200px; margin: 0 auto;
-      padding: 6rem 2.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 3rem; flex-wrap: wrap;
-    }
+    .add-inner { max-width: 1200px; margin: 0 auto; padding: 6rem 2.5rem; display: flex; align-items: center; justify-content: space-between; gap: 3rem; flex-wrap: wrap; }
     .add-inner .section-title { color: var(--sand); }
     .add-inner .section-label { color: var(--accent); }
-    .btn {
-      display: inline-flex; align-items: center; gap: 0.75rem;
-      padding: 1rem 2rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: var(--white);
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      text-decoration: none;
-    }
+    .btn { display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; background: var(--accent); color: var(--white); border: none; cursor: pointer; transition: opacity 0.2s; text-decoration: none; }
     .btn:hover { opacity: 0.85; }
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid rgba(245,240,232,0.3);
-      color: var(--sand);
-    }
-    .btn-ghost:hover { background: rgba(245,240,232,0.08); opacity: 1; }
 
-    /* ── MODAL ── */
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(26,26,24,0.7);
-      backdrop-filter: blur(4px);
-      align-items: center; justify-content: center;
-    }
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(26,26,24,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--white);
-      width: 90%; max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 3rem;
-    }
-    .modal h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem;
-      font-weight: 300;
-      margin-bottom: 2rem;
-    }
+    .modal { background: var(--white); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 3rem; }
+    .modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 2rem; }
     .form-group { margin-bottom: 1.5rem; }
-    .form-label {
-      display: block;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .form-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border);
-      background: var(--sand);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      color: var(--ink);
-      outline: none;
-      transition: border-color 0.2s;
-    }
+    .form-label { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .form-input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); background: var(--sand); font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
     .form-input:focus { border-color: var(--accent); }
     textarea.form-input { resize: vertical; min-height: 80px; }
-    .modal-actions {
-      display: flex; gap: 1rem; margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    .btn-close {
-      background: none; border: 1px solid var(--border);
-      padding: 0.75rem 1.5rem;
-      font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
-      cursor: pointer; color: var(--muted);
-    }
+    .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+    .btn-close { background: none; border: 1px solid var(--border); padding: 0.75rem 1.5rem; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; color: var(--muted); }
 
-    /* ── FOOTER ── */
-    footer {
-      background: var(--ink);
-      color: rgba(245,240,232,0.4);
-      padding: 2rem 2.5rem;
-      text-align: center;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-    }
+    /* Leaflet popup custom */
+    .leaflet-popup-content-wrapper { border-radius: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important; border: 1px solid var(--border); }
+    .leaflet-popup-content { font-family: 'Inter', sans-serif; font-size: 0.8rem; margin: 0.75rem 1rem; }
+    .popup-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; color: var(--ink); margin-bottom: 0.2rem; }
+    .popup-day { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
+    .popup-prog { font-size: 0.75rem; color: var(--muted); }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 640px) {
+    footer { background: var(--ink); color: rgba(245,240,232,0.4); padding: 2rem 2.5rem; text-align: center; font-size: 0.7rem; letter-spacing: 0.1em; }
+
+    @media (max-width: 768px) {
+      .map-cal-layout { grid-template-columns: 1fr; }
+      .calendar-panel { border-left: none; border-top: 1px solid var(--border); }
+      #map-trip { height: 320px; }
       nav { padding: 1rem 1.25rem; }
       .nav-links { gap: 1rem; }
       .section { padding: 4rem 1.25rem; }
-      .day-row { grid-template-columns: 60px 1fr; }
       .itinerary-inner { padding: 4rem 1.25rem; }
-      .add-inner { padding: 4rem 1.25rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">World Tour</a>
   <ul class="nav-links">
@@ -480,152 +169,95 @@
   </ul>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
   <p class="hero-eyebrow">Deux amies, le monde entier</p>
   <h1>Notre<br/><em>carnet</em><br/>de voyage</h1>
   <p class="hero-sub">Tous nos aventures, itinéraires et souvenirs réunis au même endroit.</p>
-  <div class="hero-scroll">
-    <div class="scroll-line"></div>
-    Découvrir
-  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div>Découvrir</div>
 </section>
 
-<!-- WORLD MAP -->
 <section id="voyages" class="section">
   <p class="section-label">Nos destinations</p>
   <h2 class="section-title">Où on est<br/>allées dans le monde</h2>
-  <div class="map-wrap" style="height:420px;">
-    <canvas id="map-world" style="height:420px;"></canvas>
-    <div class="map-legend">
-      <div class="legend-row"><div class="legend-dot" style="background:#c8815a;"></div>Étapes du voyage</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#7a9e87;border:2px solid #7a9e87;"></div>Départ / Arrivée</div>
-    </div>
-    <div class="map-tooltip" id="world-tooltip"></div>
-  </div>
-
-  <div class="trips-grid" id="trips-grid">
-    <!-- injected by JS -->
-  </div>
+  <div id="map-world" style="height:420px; border:1px solid var(--border);"></div>
+  <div class="trips-grid" id="trips-grid"></div>
 </section>
 
 <div class="divider"></div>
 
-<!-- ITINERARY -->
 <section id="itinerary">
   <div class="itinerary-inner">
     <div class="itinerary-header">
-      <div>
-        <p class="section-label" id="itin-label">Voyage en cours</p>
-        <h2 class="section-title" id="itin-title">Singapour &amp; Malaisie</h2>
-        <div class="itinerary-meta">
-          <div class="meta-item">
-            <div class="meta-label">Départ</div>
-            <div class="meta-value" id="itin-start">26 juil. 2026</div>
-          </div>
-          <div class="meta-item">
-            <div class="meta-label">Retour</div>
-            <div class="meta-value" id="itin-end">11 août 2026</div>
-          </div>
-          <div class="meta-item">
-            <div class="meta-label">Durée</div>
-            <div class="meta-value" id="itin-days">17 jours</div>
-          </div>
+      <p class="section-label" id="itin-label">Voyage à venir</p>
+      <h2 class="section-title" id="itin-title">Singapour &amp; Malaisie</h2>
+      <div class="itinerary-meta">
+        <div><div class="meta-label">Départ</div><div class="meta-value" id="itin-start">26 juil. 2026</div></div>
+        <div><div class="meta-label">Retour</div><div class="meta-value" id="itin-end">11 août 2026</div></div>
+        <div><div class="meta-label">Durée</div><div class="meta-value" id="itin-days">17 jours</div></div>
+      </div>
+    </div>
+
+    <!-- MAP + CALENDAR -->
+    <div class="map-cal-layout">
+      <div id="map-trip"></div>
+      <div class="calendar-panel">
+        <div class="cal-header">
+          <div class="cal-month" id="cal-month-title">Juillet – Août 2026</div>
+        </div>
+        <div class="cal-grid-header">
+          <div class="cal-dow">L</div><div class="cal-dow">M</div><div class="cal-dow">M</div>
+          <div class="cal-dow">J</div><div class="cal-dow">V</div><div class="cal-dow">S</div>
+          <div class="cal-dow">D</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-detail" id="cal-detail" style="display:none;">
+          <div class="cal-detail-day" id="cal-detail-day"></div>
+          <div class="cal-detail-place" id="cal-detail-place"></div>
+          <div class="cal-detail-prog" id="cal-detail-prog"></div>
         </div>
       </div>
     </div>
 
-    <div id="map-trip-wrap" class="map-wrap" style="height:320px; margin-bottom:3rem;">
-      <canvas id="map-trip" style="height:320px;"></canvas>
-      <div class="map-tooltip" id="trip-tooltip"></div>
-    </div>
-
-    <div class="days-list" id="days-list">
-      <!-- injected by JS -->
-    </div>
+    <div class="days-list" id="days-list"></div>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- BUDGET -->
 <section id="budget">
   <div class="section">
     <p class="section-label">Vue d'ensemble</p>
     <h2 class="section-title" style="margin-bottom:2rem">Budget hôtels</h2>
     <div class="budget-grid">
-      <div class="budget-item">
-        <div class="budget-label">Amara Singapore</div>
-        <div class="budget-amount">495<span class="budget-currency">CHF</span></div>
-        <div class="budget-note">3 nuits · pour deux</div>
-      </div>
-      <div class="budget-item">
-        <div class="budget-label">Aeropod Kota Kinabalu</div>
-        <div class="budget-amount">30<span class="budget-currency">CHF</span></div>
-        <div class="budget-note">1 nuit · pour deux</div>
-      </div>
-      <div class="budget-item">
-        <div class="budget-label">Seek Sophie Bornéo</div>
-        <div class="budget-amount">752<span class="budget-currency">CHF</span></div>
-        <div class="budget-note">2 nuits · package</div>
-      </div>
-      <div class="budget-item">
-        <div class="budget-label">Moxy KL Chinatown</div>
-        <div class="budget-amount">110<span class="budget-currency">CHF</span></div>
-        <div class="budget-note">2 nuits · pour deux</div>
-      </div>
-      <div class="budget-item">
-        <div class="budget-label">Fift Avenue Penang</div>
-        <div class="budget-amount">158<span class="budget-currency">CHF</span></div>
-        <div class="budget-note">2 nuits · pour deux</div>
-      </div>
-      <div class="budget-item" style="background:var(--ink);color:var(--sand);">
-        <div class="budget-label" style="color:rgba(245,240,232,0.5)">Total hôtels</div>
-        <div class="budget-amount">1'545<span class="budget-currency" style="color:rgba(245,240,232,0.5)">CHF</span></div>
-        <div class="budget-note" style="color:rgba(245,240,232,0.5)">pour deux · confirmés</div>
-      </div>
+      <div class="budget-item"><div class="budget-label">Amara Singapore</div><div class="budget-amount">495<span class="budget-currency">CHF</span></div><div class="budget-note">3 nuits · pour deux</div></div>
+      <div class="budget-item"><div class="budget-label">Aeropod Kota Kinabalu</div><div class="budget-amount">30<span class="budget-currency">CHF</span></div><div class="budget-note">1 nuit · pour deux</div></div>
+      <div class="budget-item"><div class="budget-label">Seek Sophie Bornéo</div><div class="budget-amount">752<span class="budget-currency">CHF</span></div><div class="budget-note">2 nuits · package</div></div>
+      <div class="budget-item"><div class="budget-label">Moxy KL Chinatown</div><div class="budget-amount">110<span class="budget-currency">CHF</span></div><div class="budget-note">2 nuits · pour deux</div></div>
+      <div class="budget-item"><div class="budget-label">Fift Avenue Penang</div><div class="budget-amount">158<span class="budget-currency">CHF</span></div><div class="budget-note">2 nuits · pour deux</div></div>
+      <div class="budget-item" style="background:var(--ink);color:var(--sand);"><div class="budget-label" style="color:rgba(245,240,232,0.5)">Total hôtels</div><div class="budget-amount">1 545<span class="budget-currency" style="color:rgba(245,240,232,0.5)">CHF</span></div><div class="budget-note" style="color:rgba(245,240,232,0.5)">pour deux · confirmés</div></div>
     </div>
   </div>
 </section>
 
-<!-- ADD TRIP -->
 <section id="add">
   <div class="add-inner">
     <div>
       <p class="section-label">Planifier</p>
       <h2 class="section-title">Ajouter<br/>un voyage</h2>
     </div>
-    <button class="btn" onclick="openModal()">
-      <span>+ Nouveau voyage</span>
-    </button>
+    <button class="btn" onclick="openModal()">+ Nouveau voyage</button>
   </div>
 </section>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h3>Nouveau voyage</h3>
-    <div class="form-group">
-      <label class="form-label">Nom du voyage</label>
-      <input type="text" class="form-input" id="f-name" placeholder="ex: Japon — Printemps 2027" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Destination(s)</label>
-      <input type="text" class="form-input" id="f-dest" placeholder="ex: Tokyo, Kyoto, Osaka" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Date de départ</label>
-      <input type="date" class="form-input" id="f-start" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Date de retour</label>
-      <input type="date" class="form-input" id="f-end" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <textarea class="form-input" id="f-notes" placeholder="Idées, envies, liens utiles…"></textarea>
-    </div>
+    <div class="form-group"><label class="form-label">Nom du voyage</label><input type="text" class="form-input" id="f-name" placeholder="ex: Japon — Printemps 2027" /></div>
+    <div class="form-group"><label class="form-label">Destination(s)</label><input type="text" class="form-input" id="f-dest" placeholder="ex: Tokyo, Kyoto, Osaka" /></div>
+    <div class="form-group"><label class="form-label">Date de départ</label><input type="date" class="form-input" id="f-start" /></div>
+    <div class="form-group"><label class="form-label">Date de retour</label><input type="date" class="form-input" id="f-end" /></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="f-notes" placeholder="Idées, envies, liens utiles…"></textarea></div>
     <div class="modal-actions">
       <button class="btn" onclick="saveTrip()">Enregistrer</button>
       <button class="btn-close" onclick="closeModal()">Annuler</button>
@@ -633,195 +265,232 @@
   </div>
 </div>
 
-<footer>
-  World Tour · Fait avec ♥ · <span id="year"></span>
-</footer>
+<footer>World Tour · Fait avec ♥ · <span id="year"></span></footer>
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────────
-const TRIPS = [
-  {
-    id: 'sgmy2026',
-    name: 'Singapour & Malaisie',
-    year: '2026',
-    dates: '26 juil – 11 août 2026',
-    tags: ['Asie', 'Nature', 'City'],
-    status: 'planned',
-    statusLabel: 'À venir',
-    start: '26 juil. 2026',
-    end: '11 août 2026',
-    daysCount: '17 jours',
-    stops: [
-      { name: 'Genève', lat: 46.20, lon: 6.15, day: 'Jour 1 · Départ 10h25', accent: true },
-      { name: 'Istanbul', lat: 41.01, lon: 28.97, day: 'Jour 1–2 · Escale' },
-      { name: 'Singapour', lat: 1.35, lon: 103.82, day: 'Jour 2–4 · Universal Studios, visite' },
-      { name: 'Kota Kinabalu', lat: 5.98, lon: 116.07, day: 'Jour 5 · Bornéo – arrivée' },
-      { name: 'Kinabatangan', lat: 5.42, lon: 118.03, day: 'Jour 6 · Safari jungle' },
-      { name: 'Kuala Lumpur', lat: 3.14, lon: 101.69, day: 'Jour 7–8 · Chinatown, Batu Caves' },
-      { name: 'Penang', lat: 5.41, lon: 100.33, day: 'Jour 9–10 · Georgetown' },
-      { name: 'Îles Perhentian', lat: 5.90, lon: 102.75, day: 'Jour 11–13 · Plongée & plage' },
-      { name: 'Kuala Lumpur', lat: 3.14, lon: 101.69, day: 'Jour 14–16 · Retour & vol' },
-      { name: 'Istanbul', lat: 41.01, lon: 28.97, day: 'Jour 17 · Escale retour' },
-      { name: 'Genève', lat: 46.20, lon: 6.15, day: 'Jour 17 · Arrivée 09h05', accent: true },
-    ],
-    days: [
-      { j:'Jour 1', date:'26.07', lieu:'Genève → Istanbul', hotel:'Avion', prog:'Départ 10h25 depuis Genève', note:'' },
-      { j:'Jour 2', date:'27.07', lieu:'Istanbul → Singapour', hotel:'Amara Singapore', prog:'Arrivée 09h30 · Visite Singapour', note:"Hôtel booké via Booking (annulation gratuite). Option plus proche du centre aussi disponible." },
-      { j:'Jour 3', date:'28.07', lieu:'Singapour', hotel:'Amara Singapore', prog:'Universal Studios Singapore', note:"SGD 89 / personne ≈ 55 CHF. Parc 8 min en voiture de l'hôtel." },
-      { j:'Jour 4', date:'29.07', lieu:'Singapour', hotel:'Amara Singapore', prog:'Visite libre de Singapour', note:'' },
-      { j:'Jour 5', date:'30.07', lieu:'Kota Kinabalu – Bornéo', hotel:'Aeropod LAXZONE', prog:'Vol vers Kota Kinabalu · Arrivée Bornéo', note:"Possibilité d'expérience jungle via Seek Sophie ou River Junkie Kinabatangan." },
-      { j:'Jour 6', date:'31.07', lieu:'Bornéo – Kinabatangan', hotel:'Seek Sophie (package)', prog:'Safari faune sauvage · Jungle', note:'2 nuits incluses dans le package Seek Sophie (751,74 CHF pour deux).' },
-      { j:'Jour 7', date:'01.08', lieu:'Kuala Lumpur', hotel:'Moxy KL Chinatown', prog:'Arrivée KL · Exploration Chinatown', note:'' },
-      { j:'Jour 8', date:'02.08', lieu:'Kuala Lumpur', hotel:'Moxy KL Chinatown', prog:'Visite libre KL', note:'' },
-      { j:'Jour 9', date:'03.08', lieu:'Penang', hotel:'Fift Avenue Hotel', prog:'Route KL → Ipoh → Penang', note:'' },
-      { j:'Jour 10', date:'04.08', lieu:'Penang', hotel:'Fift Avenue Hotel', prog:'Vol Penang → Kota Bahru (Malaysian Airlines)', note:'' },
-      { j:'Jour 11', date:'05.08', lieu:'Îles Perhentian', hotel:'À définir', prog:'Arrivée aux îles · Mer & plongée', note:'' },
-      { j:'Jour 12', date:'06.08', lieu:'Îles Perhentian', hotel:'À définir', prog:'Journée plage et snorkeling', note:'' },
-      { j:'Jour 13', date:'07.08', lieu:'Îles Perhentian', hotel:'À définir', prog:'Dernière journée aux îles', note:'' },
-      { j:'Jour 14', date:'08.08', lieu:'Kuala Lumpur', hotel:'À définir', prog:'Trajet îles Perhentian → KL', note:'' },
-      { j:'Jour 15', date:'09.08', lieu:'Kuala Lumpur', hotel:'À définir', prog:'Batu Caves · Visite KL', note:'' },
-      { j:'Jour 16', date:'10.08', lieu:'Kuala Lumpur → Istanbul', hotel:'Avion', prog:'Visite KL · Transfert aéroport ~20h00 · Départ 23h25', note:'' },
-      { j:'Jour 17', date:'11.08', lieu:'Istanbul → Genève', hotel:'', prog:'Arrivée Genève 09h05', note:'' },
-    ]
-  }
-];
+const TRIPS = [{
+  id: 'sgmy2026', name: 'Singapour & Malaisie', year: '2026',
+  dates: '26 juil – 11 août 2026', tags: ['Asie', 'Nature', 'City'],
+  status: 'planned', statusLabel: 'À venir',
+  start: '26 juil. 2026', end: '11 août 2026', daysCount: '17 jours',
+  stops: [
+    { name: 'Genève',          lat: 46.20, lon: 6.15,   accent: true },
+    { name: 'Istanbul',        lat: 41.01, lon: 28.97 },
+    { name: 'Singapour',       lat: 1.35,  lon: 103.82 },
+    { name: 'Kota Kinabalu',   lat: 5.98,  lon: 116.07 },
+    { name: 'Kinabatangan',    lat: 5.42,  lon: 118.03 },
+    { name: 'Kuala Lumpur',    lat: 3.14,  lon: 101.69 },
+    { name: 'Penang',          lat: 5.41,  lon: 100.33 },
+    { name: 'Îles Perhentian', lat: 5.90,  lon: 102.75 },
+    { name: 'Genève',          lat: 46.20, lon: 6.15,   accent: true },
+  ],
+  days: [
+    { j:'Jour 1',  date:'26.07', dateISO:'2026-07-26', lieu:'Genève → Istanbul',        hotel:'Avion',               prog:'Départ 10h25 depuis Genève',                         note:'', lat:46.20, lon:6.15 },
+    { j:'Jour 2',  date:'27.07', dateISO:'2026-07-27', lieu:'Istanbul → Singapour',     hotel:'Amara Singapore',     prog:'Arrivée 09h30 · Visite Singapour',                   note:"Hôtel booké via Booking (annulation gratuite).", lat:1.35, lon:103.82 },
+    { j:'Jour 3',  date:'28.07', dateISO:'2026-07-28', lieu:'Singapour',                hotel:'Amara Singapore',     prog:'Universal Studios Singapore',                         note:"SGD 89/pers ≈ 55 CHF · 8 min en voiture de l'hôtel.", lat:1.35, lon:103.82 },
+    { j:'Jour 4',  date:'29.07', dateISO:'2026-07-29', lieu:'Singapour',                hotel:'Amara Singapore',     prog:'Visite libre de Singapour',                           note:'', lat:1.35, lon:103.82 },
+    { j:'Jour 5',  date:'30.07', dateISO:'2026-07-30', lieu:'Kota Kinabalu – Bornéo',   hotel:'Aeropod LAXZONE',     prog:'Vol vers Kota Kinabalu · Arrivée Bornéo',            note:"Jungle via Seek Sophie ou River Junkie Kinabatangan.", lat:5.98, lon:116.07 },
+    { j:'Jour 6',  date:'31.07', dateISO:'2026-07-31', lieu:'Bornéo – Kinabatangan',    hotel:'Seek Sophie (pkg)',   prog:'Safari faune sauvage · Jungle',                       note:'Package Seek Sophie · 751,74 CHF pour deux.', lat:5.42, lon:118.03 },
+    { j:'Jour 7',  date:'01.08', dateISO:'2026-08-01', lieu:'Kuala Lumpur',             hotel:'Moxy KL Chinatown',   prog:'Arrivée KL · Exploration Chinatown',                 note:'', lat:3.14, lon:101.69 },
+    { j:'Jour 8',  date:'02.08', dateISO:'2026-08-02', lieu:'Kuala Lumpur',             hotel:'Moxy KL Chinatown',   prog:'Visite libre KL',                                    note:'', lat:3.14, lon:101.69 },
+    { j:'Jour 9',  date:'03.08', dateISO:'2026-08-03', lieu:'Penang',                   hotel:'Fift Avenue Hotel',   prog:'Route KL → Ipoh → Penang',                           note:'', lat:5.41, lon:100.33 },
+    { j:'Jour 10', date:'04.08', dateISO:'2026-08-04', lieu:'Penang',                   hotel:'Fift Avenue Hotel',   prog:'Vol Penang → Kota Bahru (Malaysian Airlines)',        note:'', lat:5.41, lon:100.33 },
+    { j:'Jour 11', date:'05.08', dateISO:'2026-08-05', lieu:'Îles Perhentian',          hotel:'À définir',           prog:'Arrivée aux îles · Mer & plongée',                   note:'', lat:5.90, lon:102.75 },
+    { j:'Jour 12', date:'06.08', dateISO:'2026-08-06', lieu:'Îles Perhentian',          hotel:'À définir',           prog:'Journée plage et snorkeling',                        note:'', lat:5.90, lon:102.75 },
+    { j:'Jour 13', date:'07.08', dateISO:'2026-08-07', lieu:'Îles Perhentian',          hotel:'À définir',           prog:'Dernière journée aux îles',                          note:'', lat:5.90, lon:102.75 },
+    { j:'Jour 14', date:'08.08', dateISO:'2026-08-08', lieu:'Kuala Lumpur',             hotel:'À définir',           prog:'Trajet Perhentian → KL',                             note:'', lat:3.14, lon:101.69 },
+    { j:'Jour 15', date:'09.08', dateISO:'2026-08-09', lieu:'Kuala Lumpur',             hotel:'À définir',           prog:'Batu Caves · Visite KL',                             note:'', lat:3.14, lon:101.69 },
+    { j:'Jour 16', date:'10.08', dateISO:'2026-08-10', lieu:'Kuala Lumpur → Istanbul',  hotel:'Avion',               prog:'Transfert aéroport ~20h00 · Départ 23h25',           note:'', lat:3.14, lon:101.69 },
+    { j:'Jour 17', date:'11.08', dateISO:'2026-08-11', lieu:'Istanbul → Genève',        hotel:'',                    prog:'Arrivée Genève 09h05',                               note:'', lat:46.20, lon:6.15 },
+  ]
+}];
 
 let extraTrips = JSON.parse(localStorage.getItem('wt-extra-trips') || '[]');
-
-// ── CANVAS MAP ENGINE ─────────────────────────────────────────────────────────
-function createMap(canvasId, tooltipId, stops, viewBox) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const tooltip = document.getElementById(tooltipId);
-  const ctx = canvas.getContext('2d');
-
-  // viewBox: { minLon, maxLon, minLat, maxLat }
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = canvas.parentElement.offsetHeight;
-    draw();
-  }
-
-  function lonToX(lon) {
-    return ((lon - viewBox.minLon) / (viewBox.maxLon - viewBox.minLon)) * canvas.width;
-  }
-  function latToY(lat) {
-    // Mercator-ish: flip lat so north is up
-    return ((viewBox.maxLat - lat) / (viewBox.maxLat - viewBox.minLat)) * canvas.height;
-  }
-
-  function draw() {
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // Background ocean
-    ctx.fillStyle = '#d4e8f5';
-    ctx.fillRect(0, 0, W, H);
-
-    // Grid lines
-    ctx.strokeStyle = 'rgba(120,160,200,0.2)';
-    ctx.lineWidth = 0.5;
-    for (let lon = Math.ceil(viewBox.minLon/10)*10; lon <= viewBox.maxLon; lon += 10) {
-      const x = lonToX(lon);
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-    }
-    for (let lat = Math.ceil(viewBox.minLat/10)*10; lat <= viewBox.maxLat; lat += 10) {
-      const y = latToY(lat);
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    }
-
-    // Route line
-    ctx.strokeStyle = 'rgba(200,129,90,0.7)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([6, 5]);
-    ctx.beginPath();
-    stops.forEach((s, i) => {
-      const x = lonToX(s.lon), y = latToY(s.lat);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Dots
-    stops.forEach((s, idx) => {
-      const x = lonToX(s.lon), y = latToY(s.lat);
-      const r = s.accent ? 7 : 5.5;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = s.accent ? '#7a9e87' : '#c8815a';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Label
-      const label = s.name;
-      ctx.font = '500 11px Inter, sans-serif';
-      ctx.fillStyle = '#1a1a18';
-      const tw = ctx.measureText(label).width;
-      let lx = x + r + 5;
-      let ly = y + 4;
-      if (lx + tw > W - 4) lx = x - r - 5 - tw;
-      if (ly > H - 8) ly = y - r - 4;
-      ctx.fillText(label, lx, ly);
-    });
-
-    // Subtle vignette
-    const vig = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.8);
-    vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.06)');
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // Tooltip on hover
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-    let found = null;
-    stops.forEach(s => {
-      const dx = mx - lonToX(s.lon), dy = my - latToY(s.lat);
-      if (Math.sqrt(dx*dx + dy*dy) < 14) found = s;
-    });
-    if (found && tooltip) {
-      tooltip.textContent = found.name + (found.day ? ' · ' + found.day : '');
-      tooltip.style.opacity = '1';
-      tooltip.style.left = (e.clientX - canvas.parentElement.getBoundingClientRect().left + 12) + 'px';
-      tooltip.style.top = (e.clientY - canvas.parentElement.getBoundingClientRect().top - 10) + 'px';
-    } else if (tooltip) {
-      tooltip.style.opacity = '0';
-    }
-  });
-  canvas.addEventListener('mouseleave', () => { if(tooltip) tooltip.style.opacity = '0'; });
-
-  window.addEventListener('resize', resize);
-  resize();
-}
+let tripMap = null, worldMap = null, activeMarkers = [], activeDayIdx = null;
 
 // ── WORLD MAP ─────────────────────────────────────────────────────────────────
-const worldStops = [
-  { name: 'Genève', lat: 46.20, lon: 6.15, accent: true },
-  { name: 'Istanbul', lat: 41.01, lon: 28.97 },
-  { name: 'Singapour', lat: 1.35, lon: 103.82 },
-  { name: 'Kota Kinabalu', lat: 5.98, lon: 116.07 },
-  { name: 'Kinabatangan', lat: 5.42, lon: 118.03 },
-  { name: 'Kuala Lumpur', lat: 3.14, lon: 101.69 },
-  { name: 'Penang', lat: 5.41, lon: 100.33 },
-  { name: 'Îles Perhentian', lat: 5.90, lon: 102.75 },
-];
+function initWorldMap() {
+  worldMap = L.map('map-world', { scrollWheelZoom: false, zoomControl: true });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO', maxZoom: 19
+  }).addTo(worldMap);
 
-createMap('map-world', 'world-tooltip', worldStops, {
-  minLon: -10, maxLon: 130, minLat: -5, maxLat: 55
-});
+  const worldStops = [
+    { name:'Genève', lat:46.20, lon:6.15 }, { name:'Istanbul', lat:41.01, lon:28.97 },
+    { name:'Singapour', lat:1.35, lon:103.82 }, { name:'Kota Kinabalu', lat:5.98, lon:116.07 },
+    { name:'Kinabatangan', lat:5.42, lon:118.03 }, { name:'Kuala Lumpur', lat:3.14, lon:101.69 },
+    { name:'Penang', lat:5.41, lon:100.33 }, { name:'Îles Perhentian', lat:5.90, lon:102.75 },
+  ];
+  const latlngs = worldStops.map(s => [s.lat, s.lon]);
+  L.polyline(latlngs, { color:'#c8815a', weight:1.5, opacity:0.6, dashArray:'6,5' }).addTo(worldMap);
 
-// ── TRIP MAP (Asie du Sud-Est zoom) ──────────────────────────────────────────
-function loadTripMap(trip) {
-  if (!trip.stops) return;
-  createMap('map-trip', 'trip-tooltip', trip.stops, {
-    minLon: 94, maxLon: 124, minLat: -1, maxLat: 18
+  const dotIcon = L.divIcon({
+    className:'',
+    html:'<div style="width:9px;height:9px;border-radius:50%;background:#c8815a;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div>',
+    iconSize:[9,9], iconAnchor:[4,4]
   });
+  worldStops.forEach(s => {
+    L.marker([s.lat, s.lon], { icon: dotIcon }).addTo(worldMap)
+      .bindTooltip(s.name, { permanent: false, direction: 'top', className: '' });
+  });
+  worldMap.fitBounds(latlngs, { padding:[30,30] });
+}
+
+// ── TRIP MAP ─────────────────────────────────────────────────────────────────
+function initTripMap(trip) {
+  if (tripMap) { tripMap.remove(); tripMap = null; }
+  tripMap = L.map('map-trip', { scrollWheelZoom: false, zoomControl: true });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO', maxZoom: 19
+  }).addTo(tripMap);
+
+  activeMarkers = [];
+  const uniqueStops = [];
+  const seen = new Set();
+  trip.days.forEach((d, i) => {
+    const key = d.lat + ',' + d.lon;
+    if (!seen.has(key) && d.lat) {
+      seen.add(key);
+      uniqueStops.push({ lat: d.lat, lon: d.lon, name: d.lieu, dayIdx: i });
+    }
+  });
+
+  const latlngs = uniqueStops.map(s => [s.lat, s.lon]);
+  L.polyline(latlngs, { color:'#c8815a', weight:2, opacity:0.65, dashArray:'7,5' }).addTo(tripMap);
+
+  trip.days.forEach((d, i) => {
+    if (!d.lat) return;
+    const num = i + 1;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:26px;height:26px;border-radius:50%;background:#1a1a18;color:#f5f0e8;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);cursor:pointer;">${num}</div>`,
+      iconSize:[26,26], iconAnchor:[13,13]
+    });
+    const marker = L.marker([d.lat, d.lon], { icon })
+      .addTo(tripMap)
+      .bindPopup(`
+        <div class="popup-day">${d.j} · ${d.date}</div>
+        <div class="popup-title">${d.lieu}</div>
+        <div class="popup-prog">${d.prog}</div>
+      `);
+    marker.on('click', () => highlightDay(i));
+    activeMarkers.push(marker);
+  });
+
+  tripMap.fitBounds(latlngs, { padding:[40,40] });
+}
+
+// ── CALENDAR ─────────────────────────────────────────────────────────────────
+function buildCalendar(trip) {
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // Build a map: dateISO -> day
+  const dayMap = {};
+  trip.days.forEach((d, i) => { dayMap[d.dateISO] = { ...d, idx: i }; });
+
+  // Show July + August 2026 (split view: show July first, then Aug)
+  const months = [
+    { year: 2026, month: 6, label: 'Juillet 2026' },
+    { year: 2026, month: 7, label: 'Août 2026' },
+  ];
+
+  // We'll render both months in a single 7-col grid, separated by a label row
+  months.forEach((m, mi) => {
+    // Month separator
+    const sep = document.createElement('div');
+    sep.style.cssText = 'grid-column:1/-1;padding:0.5rem 0.75rem;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);background:var(--sand);border-bottom:1px solid var(--border);';
+    sep.textContent = m.label;
+    grid.appendChild(sep);
+
+    const firstDay = new Date(m.year, m.month, 1);
+    // Monday-first: 0=Mon ... 6=Sun
+    let startDow = firstDay.getDay(); // 0=Sun...6=Sat
+    startDow = (startDow + 6) % 7;   // convert to Mon-first
+    const daysInMonth = new Date(m.year, m.month + 1, 0).getDate();
+
+    // Empty cells before first day
+    for (let e = 0; e < startDow; e++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell empty';
+      grid.appendChild(cell);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const iso = `${m.year}-${String(m.month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const d = dayMap[iso];
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell' + (d ? ' has-event' : '');
+      cell.dataset.iso = iso;
+
+      const numEl = document.createElement('span');
+      numEl.className = 'cal-num';
+      numEl.textContent = day;
+      cell.appendChild(numEl);
+
+      if (d) {
+        const place = document.createElement('div');
+        place.className = 'cal-place';
+        place.textContent = d.lieu;
+        cell.appendChild(place);
+
+        const dot = document.createElement('div');
+        dot.className = 'cal-dot';
+        cell.appendChild(dot);
+
+        cell.addEventListener('click', () => highlightDay(d.idx));
+      }
+      grid.appendChild(cell);
+    }
+
+    // Fill remaining cells to complete the last row
+    const totalCells = startDow + daysInMonth;
+    const remainder = totalCells % 7;
+    if (remainder !== 0) {
+      for (let e = 0; e < 7 - remainder; e++) {
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell empty';
+        grid.appendChild(cell);
+      }
+    }
+  });
+}
+
+// ── HIGHLIGHT DAY (map + calendar + list in sync) ───────────────────────────
+function highlightDay(dayIdx) {
+  activeDayIdx = dayIdx;
+  const trip = TRIPS[0];
+  const d = trip.days[dayIdx];
+
+  // Calendar: remove active from all, set on this one
+  document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('active-day'));
+  const targetCell = document.querySelector(`.cal-cell[data-iso="${d.dateISO}"]`);
+  if (targetCell) {
+    targetCell.classList.add('active-day');
+    targetCell.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  }
+
+  // Calendar detail panel
+  const detail = document.getElementById('cal-detail');
+  detail.style.display = 'block';
+  document.getElementById('cal-detail-day').textContent = d.j + ' · ' + d.date;
+  document.getElementById('cal-detail-place').textContent = d.lieu;
+  document.getElementById('cal-detail-prog').textContent = d.prog;
+
+  // Day list: highlight row
+  document.querySelectorAll('.day-row').forEach(r => r.classList.remove('highlighted'));
+  const rows = document.querySelectorAll('.day-row');
+  if (rows[dayIdx]) {
+    rows[dayIdx].classList.add('highlighted');
+    rows[dayIdx].scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  // Map: open popup on marker
+  if (activeMarkers[dayIdx]) {
+    activeMarkers[dayIdx].openPopup();
+    if (d.lat) tripMap.setView([d.lat, d.lon], Math.max(tripMap.getZoom(), 7), { animate: true });
+  }
 }
 
 // ── TRIP CARDS ────────────────────────────────────────────────────────────────
@@ -831,7 +500,7 @@ function renderTripCards() {
   const all = [...TRIPS, ...extraTrips];
   all.forEach((t, i) => {
     const div = document.createElement('div');
-    div.className = 'trip-card' + (i===0 ? ' active' : '');
+    div.className = 'trip-card' + (i === 0 ? ' active' : '');
     div.innerHTML = `
       <div class="trip-number">0${i+1}</div>
       <div class="trip-name">${t.name}</div>
@@ -842,7 +511,7 @@ function renderTripCards() {
     div.addEventListener('click', () => {
       document.querySelectorAll('.trip-card').forEach(c=>c.classList.remove('active'));
       div.classList.add('active');
-      if(t.days) loadItinerary(t);
+      if (t.days) loadItinerary(t);
     });
     grid.appendChild(div);
   });
@@ -857,8 +526,7 @@ function loadItinerary(trip) {
 
   const list = document.getElementById('days-list');
   list.innerHTML = '';
-  if(!trip.days) return;
-  trip.days.forEach(d => {
+  trip.days.forEach((d, i) => {
     const row = document.createElement('div');
     row.className = 'day-row';
     row.innerHTML = `
@@ -873,40 +541,38 @@ function loadItinerary(trip) {
         ${d.note ? `<div class="day-note">${d.note}</div>` : ''}
       </div>
     `;
+    row.addEventListener('click', () => highlightDay(i));
     list.appendChild(row);
   });
 
-  loadTripMap(trip);
-  document.getElementById('itinerary').scrollIntoView({ behavior:'smooth' });
+  initTripMap(trip);
+  buildCalendar(trip);
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────────────
 function openModal() { document.getElementById('modal').classList.add('open'); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
-
 function saveTrip() {
   const name = document.getElementById('f-name').value.trim();
-  const dest = document.getElementById('f-dest').value.trim();
-  const start = document.getElementById('f-start').value;
-  const end = document.getElementById('f-end').value;
-  const notes = document.getElementById('f-notes').value.trim();
   if(!name) return;
   const trip = {
-    id: 'trip-'+Date.now(), name,
-    dates: start && end ? `${start} → ${end}` : (start || end || ''),
-    year: start ? start.slice(0,4) : '?',
-    tags: dest ? dest.split(',').map(s=>s.trim()) : [],
-    status: 'planned', statusLabel: 'Planifié', notes
+    id:'trip-'+Date.now(), name,
+    dates: document.getElementById('f-start').value + ' → ' + document.getElementById('f-end').value,
+    year: document.getElementById('f-start').value.slice(0,4) || '?',
+    tags: document.getElementById('f-dest').value.split(',').map(s=>s.trim()).filter(Boolean),
+    status:'planned', statusLabel:'Planifié',
+    notes: document.getElementById('f-notes').value.trim()
   };
   extraTrips.push(trip);
   localStorage.setItem('wt-extra-trips', JSON.stringify(extraTrips));
   renderTripCards(); closeModal();
-  ['f-name','f-dest','f-start','f-end','f-notes'].forEach(id => document.getElementById(id).value='');
+  ['f-name','f-dest','f-start','f-end','f-notes'].forEach(id=>document.getElementById(id).value='');
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.getElementById('year').textContent = new Date().getFullYear();
+initWorldMap();
 renderTripCards();
 loadItinerary(TRIPS[0]);
 </script>
